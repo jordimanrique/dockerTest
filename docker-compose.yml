@@ -1,0 +1,42 @@
+version: '3'
+services:
+
+  web:
+    build: .
+    ports:
+     - "5000:5000"
+    volumes:
+     - .:/code
+
+  redis:
+    image: "redis:alpine"
+
+  elastic:
+    image: "elasticsearch:6.5.1"
+    container_name: elasticsearch
+    ports:
+     - 9200:9200
+    volumes:
+     - esdata:/usr/share/elasticsearch/data
+
+  nginx:
+    image: nginx:latest
+    ports:
+        - 8080:80
+    volumes:
+        - ${PWD}/nginx-config/:/etc/nginx/conf.d/
+    command: /bin/bash -c "nginx -g 'daemon off;'"
+    ulimits:
+      nproc: 65535   
+
+  kibana:
+    image: "kibana:6.5.1"
+    container_name: kibana
+    environment:
+      SERVER_NAME: localhost
+      ELASTICSEARCH_URL: http://elasticsearch:9200/
+    ports:
+     - 5601:5601
+
+volumes:
+  esdata:
